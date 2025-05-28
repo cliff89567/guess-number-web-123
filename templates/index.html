@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数字探秘 - 猜数字游戏</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --text: #2b2d42;
+            --text-light: #8d99ae;
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --border: #e9ecef;
+            --shadow: rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] {
+            --primary: #4895ef;
+            --primary-light: #4cc9f0;
+            --secondary: #3a0ca3;
+            --success: #4361ee;
+            --text: #edf2f4 !important;
+            /* 确保文本颜色变化 */
+            --text-light: #adb5bd !important;
+            /* 确保文本颜色变化 */
+            --bg: #121212;
+            --card: #1e1e1e;
+            --border: #2d2d2d;
+            --shadow: rgba(0, 0, 0, 0.2);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            /* 使用CSS变量设置文本颜色 */
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
+            padding-bottom: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background-color: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--shadow);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background-color: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            color: var(--text);
+            /* 确保标题颜色变化 */
+        }
+
+        .card-body {
+            padding: 1.5rem;
+            color: var(--text);
+            /* 确保正文颜色变化 */
+        }
+
+        /* 按钮样式 */
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary);
+            border-color: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+            /* 确保按钮文本颜色变化 */
+            transition: all 0.2s;
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+            border-color: var(--primary);
+        }
+
+        /* 输入框样式 */
+        .form-control {
+            background-color: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            /* 确保输入文本颜色变化 */
+            transition: all 0.3s;
+            height: 50px;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+        }
+
+        /* 游戏区域 */
+        .game-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .guess-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .guess-input {
+            flex: 1;
+        }
+
+        .submit-btn {
+            width: 120px;
+        }
+
+        /* 历史记录 */
+        .history-item {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text);
+            /* 确保历史记录文本颜色变化 */
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .correct-badge {
+            background-color: rgba(76, 201, 240, 0.15);
+            color: #4cc9f0;
+        }
+
+        .high-badge {
+            background-color: rgba(239, 71, 111, 0.15);
+            color: #ef476f;
+        }
+
+        .low-badge {
+            background-color: rgba(72, 149, 239, 0.15);
+            color: #4895ef;
+        }
+
+        /* 排行榜 */
+        .leaderboard-item {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+            /* 确保排行榜文本颜色变化 */
+        }
+
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+
+        .rank-badge {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .rank-1 {
+            background-color: gold;
+            color: #333;
+        }
+
+        .rank-2 {
+            background-color: silver;
+            color: #333;
+        }
+
+        .rank-3 {
+            background-color: #cd7f32;
+            color: white;
+        }
+
+        /* 主题切换按钮 */
+        .theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-3px) rotate(15deg);
+        }
+
+        /* 消息提示 */
+        .alert-message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text);
+            /* 确保消息文本颜色变化 */
+        }
+
+        /* 消息类型样式 */
+        .modal-content,
+        .modal-header,
+        .modal-body,
+        .modal-body p {
+            color: var(--text) !important;
+            background-color: var(--card);
+        }
+
+
+        .alert-success {
+            background-color: rgba(76, 201, 240, 0.15);
+            border-left: 4px solid #4cc9f0;
+        }
+
+        .alert-info {
+            background-color: rgba(67, 97, 238, 0.15);
+            border-left: 4px solid #4361ee;
+        }
+
+        .alert-warning {
+            background-color: rgba(255, 193, 7, 0.15);
+            border-left: 4px solid #ffc107;
+        }
+
+        .text-muted {
+            color: var(--text-light) !important;
+            /* 确保弱文本颜色变化 */
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .guess-input-group {
+                flex-direction: column;
+            }
+
+            .submit-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon"></i>
+    </div>
+
+    <div class="container py-4">
+        <header class="text-center mb-5">
+            <h1 class="display-5 fw-bold mb-3">数字探秘</h1>
+            <p class="lead text-muted">猜出神秘数字，挑战你的推理能力</p>
+        </header>
+
+        <div class="row g-4">
+            <!-- 游戏主区域 -->
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>游戏控制台</span>
+                        <div>
+                            <span class="badge bg-primary me-2">难度: <span id="difficultyDisplay">普通</span></span>
+                            <span class="badge bg-secondary">尝试: <span id="triesDisplay">0</span>/<span
+                                    id="maxTries">8</span></span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="game-container">
+                            <div class="alert-message alert-info">
+                                <i class="fas fa-info-circle fa-lg text-primary"></i>
+                                <div>我已经想好了一个 <strong id="rangeDisplay">1-100</strong> 之间的数字，开始你的推理吧！</div>
+                            </div>
+
+                            <div id="messageArea"></div>
+
+                            <div class="guess-input-group">
+                                <input type="number" class="form-control guess-input" id="guessInput"
+                                    placeholder="输入你的猜测" min="1" max="100">
+                                <button class="btn btn-primary submit-btn" id="submitGuess">
+                                    <i class="fas fa-paper-plane me-2"></i>提交
+                                </button>
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-2 mb-4">
+                                <button class="btn btn-outline" id="resetGame">
+                                    <i class="fas fa-redo me-2"></i>重置游戏
+                                </button>
+                                <button class="btn btn-outline" id="showHelp">
+                                    <i class="fas fa-question-circle me-2"></i>游戏帮助
+                                </button>
+                            </div>
+
+                            <div class="mb-4">
+                                <h5 class="mb-3">难度设置</h5>
+                                <div class="d-flex flex-wrap gap-2" id="difficultySelector">
+                                    <button class="btn btn-outline" data-diff="easy">简单 (1-50)</button>
+                                    <button class="btn btn-outline active" data-diff="normal">普通 (1-100)</button>
+                                    <button class="btn btn-outline" data-diff="hard">困难 (1-200)</button>
+                                    <button class="btn btn-outline" data-diff="expert">专家 (1-500)</button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h5 class="mb-3">游戏统计</h5>
+                                <div class="row text-center">
+                                    <div class="col-md-4 mb-3">
+                                        <div class="p-3 border rounded">
+                                            <div class="fs-2 fw-bold text-primary" id="maxTriesStat">8</div>
+                                            <div class="text-muted">最大尝试</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="p-3 border rounded">
+                                            <div class="fs-2 fw-bold text-success" id="rangeStat">1-100</div>
+                                            <div class="text-muted">数字范围</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="p-3 border rounded">
+                                            <div class="fs-2 fw-bold text-info" id="currentTries">0</div>
+                                            <div class="text-muted">当前尝试</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>尝试历史</span>
+                        <span class="badge bg-secondary"><span id="historyCount">0</span> 次尝试</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="historyList" class="text-center py-4">
+                            <i class="fas fa-history fa-2x text-muted mb-3"></i>
+                            <p class="text-muted">暂无历史记录<br>开始游戏后，你的猜测将显示在这里</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 排行榜 -->
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>玩家排行榜</span>
+                        <i class="fas fa-trophy text-warning"></i>
+                    </div>
+                    <div class="card-body" id="leaderboard">
+                        <div class="leaderboard-item d-flex align-items-center">
+                            <div class="rank-badge rank-1 me-3">1</div>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold">推理大师</div>
+                                <div class="text-muted small">3次尝试 - 普通难度</div>
+                            </div>
+                            <div class="badge bg-primary">3</div>
+                        </div>
+                        <div class="leaderboard-item d-flex align-items-center">
+                            <div class="rank-badge rank-2 me-3">2</div>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold">数字猎人</div>
+                                <div class="text-muted small">4次尝试 - 困难难度</div>
+                            </div>
+                            <div class="badge bg-primary">4</div>
+                        </div>
+                        <div class="leaderboard-item d-flex align-items-center">
+                            <div class="rank-badge rank-3 me-3">3</div>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold">神秘客</div>
+                                <div class="text-muted small">5次尝试 - 专家难度</div>
+                            </div>
+                            <div class="badge bg-primary">5</div>
+                        </div>
+                        <div class="leaderboard-item d-flex align-items-center">
+                            <div class="rank-badge me-3">4</div>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold">玩家042</div>
+                                <div class="text-muted small">6次尝试 - 普通难度</div>
+                            </div>
+                            <div class="badge bg-primary">6</div>
+                        </div>
+                        <div class="leaderboard-item d-flex align-items-center">
+                            <div class="rank-badge me-3">5</div>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold">挑战者</div>
+                                <div class="text-muted small">7次尝试 - 简单难度</div>
+                            </div>
+                            <div class="badge bg-primary">7</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span>游戏提示</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-start mb-3">
+                            <i class="fas fa-lightbulb text-warning me-3 mt-1"></i>
+                            <div>从范围中间开始猜测，根据提示逐步缩小范围</div>
+                        </div>
+                        <div class="d-flex align-items-start mb-3">
+                            <i class="fas fa-lightbulb text-warning me-3 mt-1"></i>
+                            <div>记录你的每次尝试，分析数字分布模式</div>
+                        </div>
+                        <div class="d-flex align-items-start mb-3">
+                            <i class="fas fa-lightbulb text-warning me-3 mt-1"></i>
+                            <div>尝试次数越少，在排行榜上的排名越高</div>
+                        </div>
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-lightbulb text-warning me-3 mt-1"></i>
+                            <div>挑战更高难度获得更多成就感</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 帮助弹窗 -->
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">猜数字游戏规则</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>1. 系统会随机生成一个指定范围内的数字</p>
+                    <p>2. 您需要在限定次数内猜出这个数字</p>
+                    <p>3. 每次猜测后，系统会提示您的猜测是"太大"、"太小"还是"正确"</p>
+                    <p>4. 根据提示调整您的下一次猜测</p>
+                    <p>5. 尝试次数越少，您的排名越高</p>
+                    <p class="mt-3"><strong>技巧：</strong>从范围中间开始猜测，使用二分法可以更快找到答案</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">开始游戏</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center py-4 mt-5 text-muted">
+        <div class="container">
+            <p>数字探秘 - 猜数字游戏 &copy; 2025 | 深度求索公司</p>
+            <p class="small">今天是2025年5月28日，星期三</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 游戏状态
+        const gameState = {
+            secretNumber: 0,
+            tries: 0,
+            maxTries: 8,
+            minNumber: 1,
+            maxNumber: 100,
+            difficulty: 'normal',
+            history: []
+        };
+
+        // 难度设置
+        const difficultySettings = {
+            easy: { min: 1, max: 50, maxTries: 10 },
+            normal: { min: 1, max: 100, maxTries: 8 },
+            hard: { min: 1, max: 200, maxTries: 6 },
+            expert: { min: 1, max: 500, maxTries: 5 }
+        };
+
+        // DOM 元素
+        const elements = {
+            guessInput: document.getElementById('guessInput'),
+            submitBtn: document.getElementById('submitGuess'),
+            resetBtn: document.getElementById('resetGame'),
+            helpBtn: document.getElementById('showHelp'),
+            messageArea: document.getElementById('messageArea'),
+            historyList: document.getElementById('historyList'),
+            historyCount: document.getElementById('historyCount'),
+            triesDisplay: document.getElementById('triesDisplay'),
+            currentTries: document.getElementById('currentTries'),
+            maxTries: document.getElementById('maxTries'),
+            maxTriesStat: document.getElementById('maxTriesStat'),
+            rangeDisplay: document.getElementById('rangeDisplay'),
+            rangeStat: document.getElementById('rangeStat'),
+            difficultyDisplay: document.getElementById('difficultyDisplay')
+        };
+
+        // 初始化游戏
+        function initGame() {
+            gameState.secretNumber = generateSecretNumber();
+            gameState.tries = 0;
+            gameState.history = [];
+
+            updateUI();
+            showMessage(`游戏开始！我已经想好了一个 ${gameState.minNumber}-${gameState.maxNumber} 之间的数字`, 'info');
+            elements.guessInput.focus();
+        }
+
+        // 生成秘密数字
+        function generateSecretNumber() {
+            return Math.floor(Math.random() * (gameState.maxNumber - gameState.minNumber + 1)) + gameState.minNumber;
+        }
+
+        // 处理猜测
+        function processGuess() {
+            const guessValue = elements.guessInput.value.trim();
+
+            if (!guessValue) {
+                showMessage('请输入一个数字', 'warning');
+                return;
+            }
+
+            const guess = parseInt(guessValue);
+
+            if (isNaN(guess)) {
+                showMessage('请输入有效的数字', 'warning');
+                return;
+            }
+
+            if (guess < gameState.minNumber || guess > gameState.maxNumber) {
+                showMessage(`请输入 ${gameState.minNumber} 到 ${gameState.maxNumber} 之间的数字`, 'warning');
+                return;
+            }
+
+            gameState.tries++;
+            let result = '';
+
+            if (guess === gameState.secretNumber) {
+                // 猜对了
+                result = 'correct';
+                showMessage(`🎉 恭喜你猜对了！数字是 ${gameState.secretNumber}！你总共猜了 ${gameState.tries} 次！`, 'success');
+                addToHistory(guess, result);
+                setTimeout(initGame, 3000); // 3秒后开始新游戏
+            } else if (guess < gameState.secretNumber) {
+                // 猜小了
+                result = 'low';
+                showMessage(`太小了！提示：大于 ${guess}`, 'info');
+                addToHistory(guess, result);
+            } else {
+                // 猜大了
+                result = 'high';
+                showMessage(`太大了！提示：小于 ${guess}`, 'info');
+                addToHistory(guess, result);
+            }
+
+            // 检查是否超过最大尝试次数
+            if (gameState.tries >= gameState.maxTries && result !== 'correct') {
+                showMessage(`游戏结束！你没有在 ${gameState.maxTries} 次内猜出数字。正确答案是：${gameState.secretNumber}`, 'warning');
+                setTimeout(initGame, 3000); // 3秒后开始新游戏
+            }
+
+            // 更新UI
+            updateUI();
+            elements.guessInput.value = '';
+            elements.guessInput.focus();
+        }
+
+        // 添加历史记录
+        function addToHistory(guess, result) {
+            gameState.history.unshift({
+                guess: guess,
+                result: result,
+                try_num: gameState.tries
+            });
+
+            // 只保留最近的10条记录
+            if (gameState.history.length > 10) {
+                gameState.history.pop();
+            }
+
+            renderHistory();
+        }
+
+        // 渲染历史记录
+        function renderHistory() {
+            if (gameState.history.length === 0) {
+                elements.historyList.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-history fa-2x text-muted mb-3"></i>
+                        <p class="text-muted">暂无历史记录<br>开始游戏后，你的猜测将显示在这里</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let historyHTML = '';
+            gameState.history.forEach(item => {
+                let badgeClass = '';
+                let badgeText = '';
+
+                if (item.result === 'correct') {
+                    badgeClass = 'correct-badge';
+                    badgeText = '<i class="fas fa-check-circle me-1"></i> 正确';
+                } else if (item.result === 'high') {
+                    badgeClass = 'high-badge';
+                    badgeText = '<i class="fas fa-arrow-up me-1"></i> 太大';
+                } else {
+                    badgeClass = 'low-badge';
+                    badgeText = '<i class="fas fa-arrow-down me-1"></i> 太小';
+                }
+
+                historyHTML += `
+                    <div class="history-item">
+                        <div>
+                            <span class="fw-bold">#${item.try_num}</span>
+                            <span class="ms-2">猜测: <span class="fw-bold">${item.guess}</span></span>
+                        </div>
+                        <div class="badge ${badgeClass}">${badgeText}</div>
+                    </div>
+                `;
+            });
+
+            elements.historyList.innerHTML = historyHTML;
+            elements.historyCount.textContent = gameState.history.length;
+        }
+
+        // 显示消息
+        function showMessage(message, type) {
+            let alertClass = 'alert-info';
+            let icon = '<i class="fas fa-info-circle me-2"></i>';
+
+            if (type === 'success') {
+                alertClass = 'alert-success';
+                icon = '<i class="fas fa-check-circle me-2"></i>';
+            } else if (type === 'warning') {
+                alertClass = 'alert-warning';
+                icon = '<i class="fas fa-exclamation-circle me-2"></i>';
+            }
+
+            elements.messageArea.innerHTML = `
+                <div class="alert-message ${alertClass}">
+                    ${icon}${message}
+                </div>
+            `;
+        }
+
+        // 更新UI
+        function updateUI() {
+            elements.triesDisplay.textContent = gameState.tries;
+            elements.currentTries.textContent = gameState.tries;
+            elements.maxTries.textContent = gameState.maxTries;
+            elements.maxTriesStat.textContent = gameState.maxTries;
+            elements.rangeDisplay.textContent = `${gameState.minNumber}-${gameState.maxNumber}`;
+            elements.rangeStat.textContent = `${gameState.minNumber}-${gameState.maxNumber}`;
+            elements.difficultyDisplay.textContent = getDifficultyName(gameState.difficulty);
+
+            // 更新输入框范围
+            elements.guessInput.min = gameState.minNumber;
+            elements.guessInput.max = gameState.maxNumber;
+            elements.guessInput.placeholder = `输入你的猜测 (${gameState.minNumber}-${gameState.maxNumber})`;
+        }
+
+        // 获取难度名称
+        function getDifficultyName(diff) {
+            const names = {
+                easy: '简单',
+                normal: '普通',
+                hard: '困难',
+                expert: '专家'
+            };
+            return names[diff] || diff;
+        }
+
+        // 设置难度
+        function setDifficulty(difficulty) {
+            gameState.difficulty = difficulty;
+            const settings = difficultySettings[difficulty];
+
+            gameState.minNumber = settings.min;
+            gameState.maxNumber = settings.max;
+            gameState.maxTries = settings.maxTries;
+
+            // 更新难度按钮状态
+            document.querySelectorAll('#difficultySelector button').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.diff === difficulty) {
+                    btn.classList.add('active');
+                }
+            });
+
+            initGame();
+        }
+
+        // 主题切换功能
+        function initThemeToggle() {
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = themeToggle.querySelector('i');
+
+            // 检查用户偏好
+            const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+            const currentTheme = localStorage.getItem('theme');
+
+            if (currentTheme === 'dark' || (!currentTheme && prefersDarkScheme.matches)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            }
+
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+
+                if (currentTheme === 'dark') {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                    localStorage.setItem('theme', 'dark');
+                }
+            });
+        }
+
+        // 初始化
+        function init() {
+            // 初始化主题
+            initThemeToggle();
+
+            // 设置默认难度
+            setDifficulty('normal');
+
+            // 事件监听器
+            elements.submitBtn.addEventListener('click', processGuess);
+            elements.resetBtn.addEventListener('click', initGame);
+            elements.helpBtn.addEventListener('click', () => {
+                new bootstrap.Modal(document.getElementById('helpModal')).show();
+            });
+
+            // 难度选择
+            document.querySelectorAll('#difficultySelector button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    setDifficulty(btn.dataset.diff);
+                });
+            });
+
+            // 支持按Enter键提交
+            elements.guessInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') {
+                    processGuess();
+                }
+            });
+
+            // 初始化游戏
+            initGame();
+        }
+
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>
